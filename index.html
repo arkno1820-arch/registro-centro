@@ -61,18 +61,20 @@
             box-sizing: border-box;
             font-size: 15px;
         }
+        /* Contenedor con tamaño rígido para evitar el colapso del lienzo */
         .signature-box {
             border: 3px dashed var(--secondary-color);
             border-radius: 6px;
             background-color: #ffffff;
             margin-top: 5px;
-            height: 150px;
+            height: 160px;
             width: 100%;
-            cursor: crosshair;
+            overflow: hidden;
         }
         canvas {
             display: block;
-            background: transparent;
+            background-color: #ffffff;
+            cursor: crosshair;
         }
         .clear-btn {
             background-color: #ef4444;
@@ -155,10 +157,10 @@
         <div class="form-group"><label>Correo Electrónico:</label><input type="email" id="email" required></div>
         
         <div class="form-group">
-            <label>Firma de Conformidad (Dibuje aquí dentro):</label>
+            <label>Firma de Conformidad (Escriba aquí dentro):</label>
             <div class="signature-box" id="canvasParent">
-                <!-- Dimensiones absolutas fijadas en HTML para evitar bloqueos del PC -->
-                <canvas id="signaturePad" width="460" height="150"></canvas>
+                <!-- Dimensiones absolutas fijadas en HTML para evitar bloqueos del servidor -->
+                <canvas id="signaturePad" width="460" height="160"></canvas>
             </div>
             <button type="button" class="clear-btn" id="clearSignature">Limpiar Firma</button>
         </div>
@@ -197,49 +199,52 @@
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzBfxT-0BdCvZmoWrrvI-cncUYviSYPzEDD65zu_Z4kJOuoSDuGcmKESiGSCYZRQQsAfQ/exec'; 
     const ADMIN_PASSWORD = '123'; 
 
-    // --- LIENZO DE FIRMA RESISTENTE A ERRORES LOCALES ---
+    // --- MANEJO DEL LIENZO DE FIRMA ---
     const canvas = document.getElementById('signaturePad');
     const ctx = canvas.getContext('2d');
     let isDrawing = false;
 
-    // Configuración estructural fija
+    // Configuración estructural rígida para el pincel
     ctx.lineWidth = 3;
     ctx.lineCap = 'round';
     ctx.strokeStyle = '#000000';
 
-    // Cálculo simplificado de coordenadas usando offset nativo de la caja
-    canvas.addEventListener('mousedown', (e) => {
-        isDrawing = true;
-        ctx.beginPath();
-        ctx.moveTo(e.offsetX, e.offsetY);
-    });
-
-    canvas.addEventListener('mousemove', (e) => {
-        if (!isDrawing) return;
-        ctx.lineTo(e.offsetX, e.offsetY);
-        ctx.stroke();
-    });
-
-    window.addEventListener('mouseup', () => { isDrawing = false; });
-
-    // Eventos simplificados para pantallas móviles y táctiles
-    canvas.addEventListener('touchstart', (e) => {
-        isDrawing = true;
-        ctx.beginPath();
+    // Función para calcular la posición exacta usando bounding box del navegador
+    function getMousePos(e) {
         const rect = canvas.getBoundingClientRect();
-        ctx.moveTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
-        e.preventDefault();
-    }, { passive: false });
+        return {
+            x: (e.clientX || e.touches[0].clientX) - rect.left,
+            y: (e.clientY || e.touches[0].clientY) - rect.top
+        };
+    }
 
-    canvas.addEventListener('touchmove', (e) => {
+    function startDrawing(e) {
+        isDrawing = true;
+        const pos = getMousePos(e);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+        if(e.type.includes('touch')) e.preventDefault();
+    }
+
+    function draw(e) {
         if (!isDrawing) return;
-        const rect = canvas.getBoundingClientRect();
-        ctx.lineTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
+        const pos = getMousePos(e);
+        ctx.lineTo(pos.x, pos.y);
         ctx.stroke();
-        e.preventDefault();
-    }, { passive: false });
+        if(e.type.includes('touch')) e.preventDefault();
+    }
 
-    canvas.addEventListener('touchend', () => { isDrawing = false; });
+    function stopDrawing() { isDrawing = false; }
+
+    // Eventos Mouse para computadoras
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    window.addEventListener('mouseup', stopDrawing);
+
+    // Eventos Touch para celulares/pantallas táctiles
+    canvas.addEventListener('touchstart', startDrawing, { passive: false });
+    canvas.addEventListener('touchmove', draw, { passive: false });
+    canvas.addEventListener('touchend', stopDrawing);
 
     document.getElementById('clearSignature').addEventListener('click', () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -283,11 +288,3 @@
         }).catch(err => {
             msg.style.backgroundColor = '#fef2f2';
             msg.style.color = '#dc2626';
-            msg.innerText = 'Error al conectar con la base de datos.';
-            console.error(err);
-        }).finally(() => {
-            btn.disabled = false;
-            btn.innerText = 'Enviar Inscripción';
-        });
-    });
-
