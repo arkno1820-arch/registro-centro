@@ -68,12 +68,16 @@
             margin-top: 5px;
             height: 160px;
             width: 100%;
-            overflow: hidden;
+            position: relative;
         }
         canvas {
-            display: block;
-            background-color: #ffffff;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             cursor: crosshair;
+            background-color: transparent;
         }
         .clear-btn {
             background-color: #ef4444;
@@ -156,9 +160,9 @@
         <div class="form-group"><label>Correo Electrónico:</label><input type="email" id="email" required></div>
         
         <div class="form-group">
-            <label>Firma de Conformidad (Escriba aquí dentro):</label>
+            <label>Firma de Conformidad (Dibuje aquí dentro):</label>
             <div class="signature-box" id="canvasParent">
-                <canvas id="signaturePad" width="460" height="160"></canvas>
+                <canvas id="signaturePad"></canvas>
             </div>
             <button type="button" class="clear-btn" id="clearSignature">Limpiar Firma</button>
         </div>
@@ -193,18 +197,25 @@
 </div>
 
 <script>
-    // URL E INFORMACIÓN DE ACCESO CONFIGURADA
-    const WEB_APP_URL = 'https://google.com'; 
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzBfxT-0BdCvZmoWrrvI-cncUYviSYPzEDD65zu_Z4kJOuoSDuGcmKESiGSCYZRQQsAfQ/exec'; 
     const ADMIN_PASSWORD = '123'; 
 
-    // --- MANEJO DEL LIENZO DE FIRMA ---
     const canvas = document.getElementById('signaturePad');
     const ctx = canvas.getContext('2d');
     let isDrawing = false;
 
-    ctx.lineWidth = 3;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = '#000000';
+    // INICIALIZACIÓN ABSOLUTA CON RETARDO: Resuelve el colapso a 0px en servidores
+    function resizeCanvas() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#000000';
+    }
+
+    // Disparadores de renderizado seguro
+    window.addEventListener('load', () => setTimeout(resizeCanvas, 300));
+    window.addEventListener('resize', resizeCanvas);
 
     function getMousePos(e) {
         const rect = canvas.getBoundingClientRect();
@@ -221,7 +232,7 @@
         const pos = getMousePos(e);
         ctx.beginPath();
         ctx.moveTo(pos.x, pos.y);
-        if(e.type.includes('touch')) e.preventDefault();
+        if(e.cancelable) e.preventDefault();
     }
 
     function draw(e) {
@@ -229,17 +240,17 @@
         const pos = getMousePos(e);
         ctx.lineTo(pos.x, pos.y);
         ctx.stroke();
-        if(e.type.includes('touch')) e.preventDefault();
+        if(e.cancelable) e.preventDefault();
     }
 
     function stopDrawing() { isDrawing = false; }
 
-    // Eventos Mouse para computadoras
+    // Eventos Mouse
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mousemove', draw);
     window.addEventListener('mouseup', stopDrawing);
 
-    // Eventos Touch para celulares y tabletas
+    // Eventos Touch (Móviles)
     canvas.addEventListener('touchstart', startDrawing, { passive: false });
     canvas.addEventListener('touchmove', draw, { passive: false });
     canvas.addEventListener('touchend', stopDrawing);
@@ -283,13 +294,3 @@
             msg.innerText = '¡Inscripción registrada con éxito en tu Excel!';
             form.reset();
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }).catch(err => {
-            msg.style.backgroundColor = '#fef2f2';
-            msg.style.color = '#dc2626';
-            msg.innerText = 'Error al conectar con la base de datos.';
-            console.error(err);
-        }).finally(() => {
-            btn.disabled = false;
-            btn.innerText = 'Enviar Inscripción';
-        });
-    });
