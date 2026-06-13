@@ -3,277 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro Centro de Investigación</title>
-    <style>
-        :root {
-            --primary-color: #1e3a8a;
-            --secondary-color: #3b82f6;
-            --background: #f8fafc;
-            --text-color: #334155;
-            --admin-color: #0f172a;
-        }
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background-color: var(--background);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .form-container, .admin-container {
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-            width: 100%;
-            max-width: 520px;
-            box-sizing: border-box;
-            margin-bottom: 20px;
-        }
-        .admin-container {
-            max-width: 95%;
-            display: none;
-        }
-        h2 {
-            color: var(--primary-color);
-            text-align: center;
-            margin-bottom: 25px;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 10px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        input {
-            width: 100%;
-            padding: 11px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 15px;
-        }
-        .signature-box {
-            border: 3px dashed var(--secondary-color);
-            border-radius: 6px;
-            background-color: #ffffff;
-            margin-top: 5px;
-            height: 160px;
-            width: 100%;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        canvas {
-            display: block;
-            background-color: #ffffff;
-            cursor: crosshair;
-        }
-        .clear-btn {
-            background-color: #ef4444;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            font-size: 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 8px;
-        }
-        button[type="submit"] {
-            width: 100%;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-top: 15px;
-        }
-        .message {
-            text-align: center;
-            margin-top: 15px;
-            font-weight: 600;
-            display: none;
-            padding: 10px;
-            border-radius: 6px;
-        }
-        .admin-access-btn {
-            background: #e2e8f0;
-            border: none;
-            color: #475569;
-            font-size: 13px;
-            cursor: pointer;
-            margin-top: 20px;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: bold;
-        }
-        .table-responsive {
-            overflow-x: auto;
-            margin-top: 15px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-        th, td {
-            padding: 12px;
-            border-bottom: 1px solid #cbd5e1;
-            text-align: left;
-        }
-        th {
-            background-color: var(--admin-color);
-            color: white;
-        }
-        .counter-badge {
-            background-color: var(--secondary-color);
-            color: white;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-        }
-    </style>
+    <title>Sistema de Registro de Entrada - Centro de Investigación</title>
+    <!-- Vinculación al archivo de estilos profesional -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="form-container" id="userFormSection">
-    <h2>Registro de Entrada</h2>
-    <form id="registrationForm">
-        <div class="form-group"><label>Nombre Completo:</label><input type="text" id="nombre" required></div>
-        <div class="form-group"><label>Nacionalidad:</label><input type="text" id="nacionalidad" required></div>
-        <div class="form-group"><label>RUT / DNI:</label><input type="text" id="documento" required></div>
-        <div class="form-group"><label>Responsable de la Visita:</label><input type="text" id="responsable" required></div>
-        <div class="form-group"><label>Correo Electrónico:</label><input type="email" id="email" required></div>
-        
-        <div class="form-group">
-            <label>Firma de Conformidad (Escriba aquí dentro):</label>
-            <div class="signature-box" id="canvasParent">
-                <canvas id="signaturePad"></canvas>
-            </div>
-            <button type="button" class="clear-btn" id="clearSignature">Limpiar Firma</button>
+<div class="main-wrapper">
+    <!-- SECCIÓN FORMULARIO DE REGISTRO -->
+    <div class="card-container" id="userFormSection">
+        <div class="card-header">
+            <h2>Registro de Entrada</h2>
+            <p>Control de acceso al Centro de Investigación</p>
         </div>
-        <button type="submit" id="submitBtn">Enviar Inscripción</button>
-        <div class="message" id="responseMessage"></div>
-    </form>
-    <center><button class="admin-access-btn" id="goToAdminBtn">⚙️ Acceso Administrador</button></center>
-</div>
+        
+        <form id="registrationForm" class="styled-form">
+            <div class="form-group">
+                <label for="nombre">Nombre Completo</label>
+                <input type="text" id="nombre" placeholder="Ej. César Manríquez" required>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="institucion">Institución / Empresa</label>
+                    <input type="text" id="institucion" placeholder="Organización de procedencia" required>
+                </div>
+                <div class="form-group">
+                    <label for="cargo">Cargo</label>
+                    <input type="text" id="cargo" placeholder="Puesto que desempeña" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="motivo">Motivo de la Visita</label>
+                    <input type="text" id="motivo" placeholder="Ej. Reunión técnica, Auditoría" required>
+                </div>
+                <div class="form-group">
+                    <label for="receptor">Quién Recibe</label>
+                    <input type="text" id="receptor" placeholder="Nombre del anfitrión o área" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Correo Electrónico Corporativo</label>
+                <input type="email" id="email" placeholder="usuario@institucion.cl" required>
+            </div>
+            
+            <button type="submit" id="submitBtn" class="primary-btn">Confirmar Ingreso</button>
+            <div class="notification-box" id="responseMessage"></div>
+        </form>
+        
+        <div class="card-footer">
+            <button class="text-link-btn" id="goToAdminBtn">⚙️ Acceso Administrador</button>
+        </div>
+    </div>
 
-<div class="admin-container" id="adminSection">
-    <h2>Historial de Ingresos</h2>
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <span class="counter-badge" id="totalVisits">Total Visitantes: 0</span>
-        <button class="clear-btn" style="background-color: #64748b; margin:0;" id="backToFormBtn">Volver</button>
+    <!-- SECCIÓN PANEL DE ADMINISTRACIÓN -->
+    <div class="card-container admin-container" id="adminSection">
+        <div class="card-header admin-header">
+            <h2>Panel de Control</h2>
+            <p>Historial de ingresos autorizados en tiempo real</p>
+        </div>
+        
+        <div class="admin-meta">
+            <span class="badge" id="totalVisits">Total Visitantes: 0</span>
+            <button class="secondary-btn" id="backToFormBtn">Volver al Registro</button>
+        </div>
+        
+        <div class="table-responsive">
+            <table id="adminTable">
+                <thead>
+                    <tr>
+                        <th>Fecha / Hora</th>
+                        <th>Nombre</th>
+                        <th>Institución</th>
+                        <th>Cargo</th>
+                        <th>Motivo</th>
+                        <th>Quién Recibe</th>
+                        <th>E-mail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Filas dinámicas de Google Sheets -->
+                </tbody>
+            </table>
+        </div>
     </div>
-    <div class="table-responsive">
-        <table id="adminTable">
-            <thead>
-                <tr>
-                    <th>Fecha / Hora</th>
-                    <th>Nombre</th>
-                    <th>Nacionalidad</th>
-                    <th>RUT/DNI</th>
-                    <th>Responsable</th>
-                    <th>Email</th>
-                    <th>Firma</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
+
+    <!-- CRÉDITOS DE AUTORÍA DEL WEBMASTER -->
+    <footer class="webmaster-footer">
+        <p>Desarrollado por el Webmaster <strong>César Manríquez</strong> &copy; 2026</p>
+    </footer>
 </div>
 
 <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzBfxT-0BdCvZmoWrrvI-cncUYviSYPzEDD65zu_Z4kJOuoSDuGcmKESiGSCYZRQQsAfQ/exec'; 
+    // URL ÚNICA DE CONEXIÓN CON GOOGLE DRIVE
+    const WEB_APP_URL = 'https://google.com'; 
     const ADMIN_PASSWORD = '123'; 
 
-    // --- MANEJO DEL LIENZO DE FIRMA (FORZADO ABSOLUTO ANTI-BLOQUEOS) ---
-    const canvas = document.getElementById('signaturePad');
-    const ctx = canvas.getContext('2d');
-    let isDrawing = false;
-
-    // Forzar tamaño físico interno de píxeles ignorando las CSS del servidor remoto
-    canvas.width = 460;
-    canvas.height = 160;
-
-    ctx.lineWidth = 3;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = '#000000';
-
-    function getMousePos(e) {
-        const rect = canvas.getBoundingClientRect();
-        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-        return {
-            x: clientX - rect.left,
-            y: clientY - rect.top
-        };
-    }
-
-    function startDrawing(e) {
-        isDrawing = true;
-        const pos = getMousePos(e);
-        ctx.beginPath();
-        ctx.moveTo(pos.x, pos.y);
-        if(e.cancelable) e.preventDefault();
-    }
-
-    function draw(e) {
-        if (!isDrawing) return;
-        const pos = getMousePos(e);
-        ctx.lineTo(pos.x, pos.y);
-        ctx.stroke();
-        if(e.cancelable) e.preventDefault();
-    }
-
-    function stopDrawing() { isDrawing = false; }
-
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mousemove', draw);
-    window.addEventListener('mouseup', stopDrawing);
-
-    canvas.addEventListener('touchstart', startDrawing, { passive: false });
-    canvas.addEventListener('touchmove', draw, { passive: false });
-    canvas.addEventListener('touchend', stopDrawing);
-
-    document.getElementById('clearSignature').addEventListener('click', () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-    });
-
-    // --- ENVÍO DE DATOS ASÍNCRONO ---
     const form = document.getElementById('registrationForm');
     const msg = document.getElementById('responseMessage');
     const btn = document.getElementById('submitBtn');
 
+    // --- LOGICA DE ENVÍO DE DATOS ---
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         btn.disabled = true;
-        btn.innerText = 'Enviando...';
+        btn.innerText = 'Procesando...';
+        msg.className = 'notification-box info';
         msg.style.display = 'block';
-        msg.style.backgroundColor = '#eff6ff';
-        msg.style.color = '#2563eb';
-        msg.innerText = 'Guardando en Drive...';
+        msg.innerText = 'Validando credenciales y guardando registro...';
 
         const payload = {
             fecha: new Date().toLocaleString('es-ES'),
             nombre: document.getElementById('nombre').value,
-            nacionalidad: document.getElementById('nacionalidad').value,
-            documento: document.getElementById('documento').value,
-            responsable: document.getElementById('responsable').value,
-            email: document.getElementById('email').value,
-            firma: canvas.toDataURL('image/png')
+            institucion: document.getElementById('institucion').value,
+            cargo: document.getElementById('cargo').value,
+            motivo: document.getElementById('motivo').value,
+            receptor: document.getElementById('receptor').value,
+            email: document.getElementById('email').value
         };
 
         fetch(WEB_APP_URL, {
@@ -282,14 +131,72 @@
             headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify(payload)
         }).then(() => {
-            msg.style.backgroundColor = '#ecfdf5';
-            msg.style.color = '#059669';
-            msg.innerText = '¡Inscripción registrada con éxito en tu Excel!';
+            msg.className = 'notification-box success';
+            msg.innerText = '¡Acceso registrado y autorizado con éxito!';
             form.reset();
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            setTimeout(() => { msg.style.display = 'none'; }, 4000);
         }).catch(err => {
-            msg.style.backgroundColor = '#fef2f2';
-            msg.style.color = '#dc2626';
-            msg.innerText = 'Error al conectar con la base de datos.';
+            msg.className = 'notification-box error';
+            msg.innerText = 'Error crítico de comunicación con el servidor.';
             console.error(err);
         }).finally(() => {
+            btn.disabled = false;
+            btn.innerText = 'Confirmar Ingreso';
+        });
+    });
+
+    // --- LOGICA DEL PANEL ADMINISTRATIVO ---
+    const userFormSection = document.getElementById('userFormSection');
+    const adminSection = document.getElementById('adminSection');
+    const adminTableBody = document.querySelector('#adminTable tbody');
+
+    document.getElementById('goToAdminBtn').addEventListener('click', function() {
+        const passwordInput = prompt('Autenticación Requerida.\nIngrese contraseña de Administrador:');
+        if (passwordInput === ADMIN_PASSWORD) {
+            userFormSection.style.display = 'none';
+            adminSection.style.display = 'block';
+            loadAdminData();
+        } else if (passwordInput !== null) {
+            alert('Acceso denegado. Contraseña incorrecta.');
+        }
+    });
+
+    document.getElementById('backToFormBtn').addEventListener('click', function() {
+        adminSection.style.display = 'none';
+        userFormSection.style.display = 'block';
+    });
+
+    function loadAdminData() {
+        adminTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 25px; color: #64748b;">Consultando base de datos segura en Drive...</td></tr>';
+        
+        fetch(`${WEB_APP_URL}?action=read`)
+        .then(res => res.json())
+        .then(records => {
+            adminTableBody.innerHTML = '';
+            document.getElementById('totalVisits').innerText = `Total Visitantes: ${records.length}`;
+
+            if(records.length === 0) {
+                adminTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 25px;">No existen registros de entrada previos.</td></tr>';
+                return;
+            }
+            records.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${row.fecha}</strong></td>
+                    <td>${row.nombre}</td>
+                    <td>${row.institucion}</td>
+                    <td>${row.cargo}</td>
+                    <td>${row.motivo}</td>
+                    <td>${row.receptor}</td>
+                    <td><a href="mailto:${row.email}" style="color:#3b82f6; text-decoration:none;">${row.email}</a></td>
+                `;
+                adminTableBody.appendChild(tr);
+            });
+        }).catch(err => {
+            adminTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#ef4444; font-weight:600; padding: 25px;">Error: No se pudo verificar la base de datos de Google.</td></tr>';
+            console.error(err);
+        });
+    }
+</script>
+</body>
+</html>
