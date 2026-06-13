@@ -2,31 +2,30 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Registro de Entrada - Centro de Investigación</title>
-    <!-- Vinculación al archivo de estilos profesional -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Acceso Móvil - Centro de Investigación</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="main-wrapper">
-    <!-- SECCIÓN FORMULARIO DE REGISTRO -->
+    <!-- RECUADRO DEL FORMULARIO -->
     <div class="card-container" id="userFormSection">
         <div class="card-header">
             <h2>Registro de Entrada</h2>
-            <p>Control de acceso al Centro de Investigación</p>
+            <p>Control de acceso escaneado por QR</p>
         </div>
         
-        <form id="registrationForm" class="styled-form">
+        <form id="registrationForm" class="styled-form" autocomplete="off">
             <div class="form-group">
                 <label for="nombre">Nombre Completo</label>
-                <input type="text" id="nombre" placeholder="Ej. César Manríquez" required>
+                <input type="text" id="nombre" placeholder="Ej. César Manríquez" autocapitalize="words" required>
             </div>
             
             <div class="form-row">
                 <div class="form-group">
                     <label for="institucion">Institución / Empresa</label>
-                    <input type="text" id="institucion" placeholder="Organización de procedencia" required>
+                    <input type="text" id="institucion" placeholder="Procedencia" required>
                 </div>
                 <div class="form-group">
                     <label for="cargo">Cargo</label>
@@ -37,17 +36,17 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="motivo">Motivo de la Visita</label>
-                    <input type="text" id="motivo" placeholder="Ej. Reunión técnica, Auditoría" required>
+                    <input type="text" id="motivo" placeholder="Ej. Reunión, Auditoría" required>
                 </div>
                 <div class="form-group">
                     <label for="receptor">Quién Recibe</label>
-                    <input type="text" id="receptor" placeholder="Nombre del anfitrión o área" required>
+                    <input type="text" id="receptor" placeholder="Persona o área" required>
                 </div>
             </div>
             
             <div class="form-group">
-                <label for="email">Correo Electrónico Corporativo</label>
-                <input type="email" id="email" placeholder="usuario@institucion.cl" required>
+                <label for="email">Correo Electrónico</label>
+                <input type="email" id="email" placeholder="nombre@empresa.com" inputmode="email" required>
             </div>
             
             <button type="submit" id="submitBtn" class="primary-btn">Confirmar Ingreso</button>
@@ -59,7 +58,7 @@
         </div>
     </div>
 
-    <!-- SECCIÓN PANEL DE ADMINISTRACIÓN -->
+    <!-- RECUADRO DEL PANEL ADMINISTRADOR (Diseño adaptable a tablets/móviles) -->
     <div class="card-container admin-container" id="adminSection">
         <div class="card-header admin-header">
             <h2>Panel de Control</h2>
@@ -67,8 +66,8 @@
         </div>
         
         <div class="admin-meta">
-            <span class="badge" id="totalVisits">Total Visitantes: 0</span>
-            <button class="secondary-btn" id="backToFormBtn">Volver al Registro</button>
+            <span class="badge" id="totalVisits">Total: 0</span>
+            <button class="secondary-btn" id="backToFormBtn">Volver</button>
         </div>
         
         <div class="table-responsive">
@@ -80,25 +79,22 @@
                         <th>Institución</th>
                         <th>Cargo</th>
                         <th>Motivo</th>
-                        <th>Quién Recibe</th>
+                        <th>Recibe</th>
                         <th>E-mail</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <!-- Filas dinámicas de Google Sheets -->
-                </tbody>
+                <tbody></tbody>
             </table>
         </div>
     </div>
 
-    <!-- CRÉDITOS DE AUTORÍA DEL WEBMASTER -->
+    <!-- CRÉDITOS DE AUTORÍA -->
     <footer class="webmaster-footer">
-        <p>Desarrollado por el Webmaster <strong>César Manríquez</strong> &copy; 2026</p>
+        <p>Optimizado para Android e iOS por el Webmaster <strong>César Manríquez</strong> &copy; 2026</p>
     </footer>
 </div>
 
 <script>
-    // URL ÚNICA DE CONEXIÓN CON GOOGLE DRIVE
     const WEB_APP_URL = 'https://google.com'; 
     const ADMIN_PASSWORD = '123'; 
 
@@ -106,14 +102,13 @@
     const msg = document.getElementById('responseMessage');
     const btn = document.getElementById('submitBtn');
 
-    // --- LOGICA DE ENVÍO DE DATOS ---
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         btn.disabled = true;
         btn.innerText = 'Procesando...';
         msg.className = 'notification-box info';
         msg.style.display = 'block';
-        msg.innerText = 'Validando credenciales y guardando registro...';
+        msg.innerText = 'Guardando registro de acceso...';
 
         const payload = {
             fecha: new Date().toLocaleString('es-ES'),
@@ -132,12 +127,12 @@
             body: JSON.stringify(payload)
         }).then(() => {
             msg.className = 'notification-box success';
-            msg.innerText = '¡Acceso registrado y autorizado con éxito!';
+            msg.innerText = '¡Ingreso autorizado con éxito!';
             form.reset();
             setTimeout(() => { msg.style.display = 'none'; }, 4000);
         }).catch(err => {
             msg.className = 'notification-box error';
-            msg.innerText = 'Error crítico de comunicación con el servidor.';
+            msg.innerText = 'Error de conexión móvil.';
             console.error(err);
         }).finally(() => {
             btn.disabled = false;
@@ -145,19 +140,18 @@
         });
     });
 
-    // --- LOGICA DEL PANEL ADMINISTRATIVO ---
     const userFormSection = document.getElementById('userFormSection');
     const adminSection = document.getElementById('adminSection');
     const adminTableBody = document.querySelector('#adminTable tbody');
 
     document.getElementById('goToAdminBtn').addEventListener('click', function() {
-        const passwordInput = prompt('Autenticación Requerida.\nIngrese contraseña de Administrador:');
+        const passwordInput = prompt('Autenticación Requerida.\nContraseña de Administrador:');
         if (passwordInput === ADMIN_PASSWORD) {
             userFormSection.style.display = 'none';
             adminSection.style.display = 'block';
             loadAdminData();
         } else if (passwordInput !== null) {
-            alert('Acceso denegado. Contraseña incorrecta.');
+            alert('Contraseña incorrecta.');
         }
     });
 
@@ -167,16 +161,16 @@
     });
 
     function loadAdminData() {
-        adminTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 25px; color: #64748b;">Consultando base de datos segura en Drive...</td></tr>';
+        adminTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:#64748b;">Cargando base de datos segura...</td></tr>';
         
         fetch(`${WEB_APP_URL}?action=read`)
         .then(res => res.json())
         .then(records => {
             adminTableBody.innerHTML = '';
-            document.getElementById('totalVisits').innerText = `Total Visitantes: ${records.length}`;
+            document.getElementById('totalVisits').innerText = `Total: ${records.length}`;
 
             if(records.length === 0) {
-                adminTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 25px;">No existen registros de entrada previos.</td></tr>';
+                adminTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">Sin visitas registradas hoy.</td></tr>';
                 return;
             }
             records.forEach(row => {
@@ -188,12 +182,12 @@
                     <td>${row.cargo}</td>
                     <td>${row.motivo}</td>
                     <td>${row.receptor}</td>
-                    <td><a href="mailto:${row.email}" style="color:#3b82f6; text-decoration:none;">${row.email}</a></td>
+                    <td><a href="mailto:${row.email}">${row.email}</a></td>
                 `;
                 adminTableBody.appendChild(tr);
             });
         }).catch(err => {
-            adminTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#ef4444; font-weight:600; padding: 25px;">Error: No se pudo verificar la base de datos de Google.</td></tr>';
+            adminTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#ef4444; padding:20px;">Error al conectar con Drive.</td></tr>';
             console.error(err);
         });
     }
