@@ -9,6 +9,7 @@
 <body>
 
 <div class="main-wrapper">
+    <!-- RECUADRO DEL FORMULARIO DE REGISTRO -->
     <div class="card-container" id="userFormSection">
         <div class="card-header">
             <h2>Registro de Entrada</h2>
@@ -57,6 +58,7 @@
         </div>
     </div>
 
+    <!-- RECUADRO DEL PANEL ADMINISTRADOR -->
     <div class="card-container admin-container" id="adminSection">
         <div class="card-header admin-header">
             <h2>Panel de Control</h2>
@@ -87,19 +89,22 @@
         </div>
     </div>
 
+    <!-- CRÉDITOS DE AUTORÍA DEL WEBMASTER -->
     <footer class="webmaster-footer">
         <p>Optimizado para Android e iOS por el Webmaster <strong>César Manríquez</strong> &copy; 2026</p>
     </footer>
 </div>
 
 <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwLSztgJER9lk1WvLAgl2r7Ycj5T8GNwdsO8VrekcsYoGso90moNPPp3gt-MOMiOkTnzQ/exec'; 
+    // URL DE TU WEB APP EN GOOGLE DRIVE Y CONTRASEÑA DE SEGURIDAD
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzcaBCffWCQ6zHSw8Mv7L-SgAhlAzKJo4OENqq9bJHVj-bijQ0cxc79rhySSB6HJYyXYQ/exec'; 
     const ADMIN_PASSWORD = 'camf1980!'; 
 
     const form = document.getElementById('registrationForm');
     const msg = document.getElementById('responseMessage');
     const btn = document.getElementById('submitBtn');
 
+    // Función que captura el formato amigable DD/MM/YYYY - HH:MM en Hora Local
     function obtenerFechaFormateada() {
         const ahora = new Date();
         const dia = String(ahora.getDate()).padStart(2, '0');
@@ -110,6 +115,7 @@
         return `${dia}/${mes}/${anio} - ${horas}:${minutos}`;
     }
 
+    // --- LOGICA DE ENVÍO DE DATOS (VISITANTE) ---
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         btn.disabled = true;
@@ -132,7 +138,7 @@
         fetch(WEB_APP_URL, {
             method: 'POST',
             mode: 'no-cors', 
-            headers: { 'Content-Type': 'text/plain' },
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify(payload)
         }).then(() => {
             msg.className = 'notification-box success';
@@ -149,6 +155,7 @@
         });
     });
 
+    // --- PANEL ADMINISTRADOR INTERNO ---
     const userFormSection = document.getElementById('userFormSection');
     const adminSection = document.getElementById('adminSection');
     const adminTableBody = document.querySelector('#adminTable tbody');
@@ -183,21 +190,9 @@
                 return;
             }
             records.forEach((row, index) => {
-                let fechaLimpia = row.fecha;
-                if(fechaLimpia && fechaLimpia.includes('T')) {
-                    try {
-                        const d = new Date(fechaLimpia);
-                        const dia = String(d.getDate()).padStart(2, '0');
-                        const mes = String(d.getMonth() + 1).padStart(2, '0');
-                        const horas = String(d.getHours()).padStart(2, '0');
-                        const mins = String(d.getMinutes()).padStart(2, '0');
-                        fechaLimpia = `${dia}/${mes}/${d.getFullYear()} - ${horas}:${mins}`;
-                    } catch(e) {}
-                }
-
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><strong>${fechaLimpia}</strong></td>
+                    <td><strong>${row.fecha}</strong></td>
                     <td>${row.nombre}</td>
                     <td>${row.institucion}</td>
                     <td>${row.cargo}</td>
@@ -216,6 +211,7 @@
         });
     }
 
+    // Función de envío por correo electrónico que ejecuta el Administrador
     function enviarPorEmail(filaExcel) {
         const destino = prompt("Ingrese el correo del destinatario:");
         if (!destino) return;
@@ -232,7 +228,12 @@
                 emailDestino: destino
             })
         }).then(() => {
-            alert("¡Formulario enviado con éxito!");
+            alert("¡Formulario enviado con éxito por correo electrónico!");
         }).catch(err => {
             alert("Error al despachar el correo.");
             console.error(err);
+        });
+    }
+</script>
+</body>
+</html>
