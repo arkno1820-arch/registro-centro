@@ -58,7 +58,7 @@
         </div>
     </div>
 
-    <!-- RECUADRO DEL PANEL ADMINISTRADOR (Diseño adaptable a tablets/móviles) -->
+    <!-- RECUADRO DEL PANEL ADMINISTRADOR (Blindado con bloqueo visual por defecto) -->
     <div class="card-container admin-container" id="adminSection">
         <div class="card-header admin-header">
             <h2>Panel de Control</h2>
@@ -148,7 +148,7 @@
         const passwordInput = prompt('Autenticación Requerida.\nContraseña de Administrador:');
         if (passwordInput === ADMIN_PASSWORD) {
             userFormSection.style.display = 'none';
-            adminSection.style.display = 'block';
+            adminSection.style.setProperty('display', 'block', 'important'); // Desbloquea visualmente con prioridad interna
             loadAdminData();
         } else if (passwordInput !== null) {
             alert('Contraseña incorrecta.');
@@ -156,7 +156,7 @@
     });
 
     document.getElementById('backToFormBtn').addEventListener('click', function() {
-        adminSection.style.display = 'none';
+        adminSection.style.setProperty('display', 'none', 'important'); // Vuelve a ocultar estrictamente
         userFormSection.style.display = 'block';
     });
 
