@@ -58,7 +58,7 @@
         </div>
     </div>
 
-    <!-- RECUADRO DEL PANEL ADMINISTRADOR (Blindado con bloqueo visual por defecto) -->
+    <!-- RECUADRO DEL PANEL ADMINISTRADOR -->
     <div class="card-container admin-container" id="adminSection">
         <div class="card-header admin-header">
             <h2>Panel de Control</h2>
@@ -81,6 +81,7 @@
                         <th>Motivo</th>
                         <th>Recibe</th>
                         <th>E-mail</th>
+                        <th>Acción</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -95,13 +96,25 @@
 </div>
 
 <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwRZc9qafE51R3wtJeAehGtpxQF2HT7gC5lDHotlqCaPgvXaiZlZsr295AH1WpzTRcUmQ/exec'; 
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxoegNitJCDlB9xc1xA4L9yflaxzHjA4vtMpS-kKjwKd0VPIcWI7sFiax31HJnkTM3NFg/exec'; 
     const ADMIN_PASSWORD = 'camf1980!'; 
 
     const form = document.getElementById('registrationForm');
     const msg = document.getElementById('responseMessage');
     const btn = document.getElementById('submitBtn');
 
+    // Función que corrige el formato a DD/MM/YYYY - HH:MM en Hora Local
+    function obtenerFechaFormateada() {
+        const ahora = new Date();
+        const dia = String(ahora.getDate()).padStart(2, '0');
+        const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+        const anio = ahora.getFullYear();
+        const horas = String(ahora.getHours()).padStart(2, '0');
+        const minutos = String(ahora.getMinutes()).padStart(2, '0');
+        return `${dia}/${mes}/${anio} - ${horas}:${minutos}`;
+    }
+
+    // --- LOGICA DE ENVÍO DE DATOS ---
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         btn.disabled = true;
@@ -111,7 +124,8 @@
         msg.innerText = 'Guardando registro de acceso...';
 
         const payload = {
-            fecha: new Date().toLocaleString('es-ES'),
+            action: 'insert',
+            fecha: obtenerFechaFormateada(),
             nombre: document.getElementById('nombre').value,
             institucion: document.getElementById('institucion').value,
             cargo: document.getElementById('cargo').value,
@@ -140,6 +154,7 @@
         });
     });
 
+    // --- PANEL ADMINISTRADOR ---
     const userFormSection = document.getElementById('userFormSection');
     const adminSection = document.getElementById('adminSection');
     const adminTableBody = document.querySelector('#adminTable tbody');
@@ -148,7 +163,7 @@
         const passwordInput = prompt('Autenticación Requerida.\nContraseña de Administrador:');
         if (passwordInput === ADMIN_PASSWORD) {
             userFormSection.style.display = 'none';
-            adminSection.style.setProperty('display', 'block', 'important'); // Desbloquea visualmente con prioridad interna
+            adminSection.style.setProperty('display', 'block', 'important');
             loadAdminData();
         } else if (passwordInput !== null) {
             alert('Contraseña incorrecta.');
@@ -156,12 +171,12 @@
     });
 
     document.getElementById('backToFormBtn').addEventListener('click', function() {
-        adminSection.style.setProperty('display', 'none', 'important'); // Vuelve a ocultar estrictamente
+        adminSection.style.setProperty('display', 'none', 'important');
         userFormSection.style.display = 'block';
     });
 
     function loadAdminData() {
-        adminTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:#64748b;">Cargando base de datos segura...</td></tr>';
+        adminTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:#64748b;">Cargando base de datos segura...</td></tr>';
         
         fetch(`${WEB_APP_URL}?action=read`)
         .then(res => res.json())
@@ -170,27 +185,48 @@
             document.getElementById('totalVisits').innerText = `Total: ${records.length}`;
 
             if(records.length === 0) {
-                adminTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">Sin visitas registradas hoy.</td></tr>';
+                adminTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px;">Sin visitas registradas hoy.</td></tr>';
                 return;
             }
-            records.forEach(row => {
+            records.forEach((row, index) => {
+                // Parche para limpiar el formato ISO largo que Sheets genera automáticamente
+                let fechaLimpia = row.fecha;
+                if(fechaLimpia.includes('T')) {
+                    try {
+                        const d = new Date(fechaLimpia);
+                        const dia = String(d.getDate()).padStart(2, '0');
+                        const mes = String(d.getMonth() + 1).padStart(2, '0');
+                        const horas = String(d.getHours()).padStart(2, '0');
+                        const mins = String(d.getMinutes()).padStart(2, '0');
+                        fechaLimpia = `${dia}/${mes}/${d.getFullYear()} - ${horas}:${mins}`;
+                    } catch(e) {}
+                }
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><strong>${row.fecha}</strong></td>
+                    <td><strong>${fechaLimpia}</strong></td>
                     <td>${row.nombre}</td>
                     <td>${row.institucion}</td>
                     <td>${row.cargo}</td>
                     <td>${row.motivo}</td>
                     <td>${row.receptor}</td>
                     <td><a href="mailto:${row.email}">${row.email}</a></td>
+                    <td>
+                        <button class="secondary-btn" style="padding: 6px 10px; font-size: 12px; background-color: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="enviarPorEmail(${index + 2})">✉️ Enviar</button>
+                    </td>
                 `;
                 adminTableBody.appendChild(tr);
             });
         }).catch(err => {
-            adminTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#ef4444; padding:20px;">Error al conectar con Drive.</td></tr>';
+            adminTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#ef4444; padding:20px;">Error al conectar con Drive.</td></tr>';
             console.error(err);
         });
     }
-</script>
-</body>
-</html>
+
+    // Función de envío por correo electrónico ejecutada por el Administrador
+    function enviarPorEmail(filaExcel) {
+        const destino = prompt("Ingrese el correo del destinatario para remitir el formulario:");
+        if (!destino) return;
+
+        alert("Despachando correo electrónico... Presione aceptar.");
+
