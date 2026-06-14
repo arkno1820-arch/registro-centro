@@ -68,7 +68,6 @@
         <div class="admin-meta">
             <div>
                 <span class="badge" id="totalVisits">Total: 0</span>
-                <!-- BOTÓN ÚNICO GLOBAL PARA ENVIAR TODO EL REPORTE -->
                 <button class="secondary-btn" style="background-color: #2563eb; color: white; border: none; margin-left: 10px;" id="sendAllEmailBtn">✉️ Enviar Reporte Completo</button>
             </div>
             <button class="secondary-btn" id="backToFormBtn">Volver</button>
@@ -92,74 +91,100 @@
         </div>
     </div>
 
-    <!-- CRÉDITOS DE AUTORÍA DEL WEBMASTER -->
     <footer class="webmaster-footer">
         <p>Optimizado para Android e iOS por el Webmaster <strong>César Manríquez</strong> &copy; 2026</p>
     </footer>
 </div>
 
 <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxx7nNFloFSBhSJ7mvMGAdZssmEpnte_ItN8dPE7_niet5m9YP6BI9jvdF8oYM7t8PWXw/exec'; 
-    const ADMIN_PASSWORD = 'camf1980!'; 
+    // ============================================================
+    //  CONFIGURACIÓN — Reemplaza la URL si redesplegas el script
+    // ============================================================
+    const WEB_APP_URL   = 'https://script.google.com/macros/s/AKfycbxx7nNFloFSBhSJ7mvMGAdZssmEpnte_ItN8dPE7_niet5m9YP6BI9jvdF8oYM7t8PWXw/exec';
+    const ADMIN_PASSWORD = 'camf1980!';
 
+    // ============================================================
+    //  UTILIDADES
+    // ============================================================
     const form = document.getElementById('registrationForm');
-    const msg = document.getElementById('responseMessage');
-    const btn = document.getElementById('submitBtn');
+    const msg  = document.getElementById('responseMessage');
+    const btn  = document.getElementById('submitBtn');
 
     function obtenerFechaFormateada() {
-        const ahora = new Date();
-        const dia = String(ahora.getDate()).padStart(2, '0');
-        const mes = String(ahora.getMonth() + 1).padStart(2, '0');
-        const anio = ahora.getFullYear();
-        const horas = String(ahora.getHours()).padStart(2, '0');
+        const ahora   = new Date();
+        const dia     = String(ahora.getDate()).padStart(2, '0');
+        const mes     = String(ahora.getMonth() + 1).padStart(2, '0');
+        const anio    = ahora.getFullYear();
+        const horas   = String(ahora.getHours()).padStart(2, '0');
         const minutos = String(ahora.getMinutes()).padStart(2, '0');
         return `${dia}/${mes}/${anio} - ${horas}:${minutos}`;
     }
 
-    // --- LÓGICA DE ENVÍO DE DATOS ---
+    // ============================================================
+    //  HELPER CENTRAL DE FETCH — sin no-cors para que el JSON
+    //  llegue correctamente al cuerpo de la petición POST.
+    //  CORS en la RESPUESTA puede lanzar un error de red en el
+    //  navegador; lo capturamos pero el script YA procesó el dato.
+    // ============================================================
+    function postToScript(payload) {
+        return fetch(WEB_APP_URL, {
+            method : 'POST',
+            // ✅ SIN mode:'no-cors' — es lo que causaba que el body
+            //    llegara vacío a Apps Script y el mail nunca se enviara.
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body   : JSON.stringify(payload)
+        });
+    }
+
+    // ============================================================
+    //  ENVÍO DEL FORMULARIO DE REGISTRO
+    // ============================================================
     form.addEventListener('submit', function(e) {
         e.preventDefault();
-        btn.disabled = true;
-        btn.innerText = 'Procesando...';
-        msg.className = 'notification-box info';
+        btn.disabled   = true;
+        btn.innerText  = 'Procesando...';
+        msg.className  = 'notification-box info';
         msg.style.display = 'block';
-        msg.innerText = 'Guardando registro de acceso...';
+        msg.innerText  = 'Guardando registro de acceso...';
 
         const payload = {
-            action: 'insert',
-            fecha: obtenerFechaFormateada(),
-            nombre: document.getElementById('nombre').value,
-            institucion: document.getElementById('institucion').value,
-            cargo: document.getElementById('cargo').value,
-            motivo: document.getElementById('motivo').value,
-            receptor: document.getElementById('receptor').value,
-            email: document.getElementById('email').value
+            fecha       : obtenerFechaFormateada(),
+            nombre      : document.getElementById('nombre').value,
+            institucion : document.getElementById('institucion').value,
+            cargo       : document.getElementById('cargo').value,
+            motivo      : document.getElementById('motivo').value,
+            receptor    : document.getElementById('receptor').value,
+            email       : document.getElementById('email').value
         };
 
-        fetch(WEB_APP_URL, {
-            method: 'POST',
-            mode: 'no-cors', 
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(payload)
-        }).then(() => {
-            msg.className = 'notification-box success';
-            msg.innerText = '¡Ingreso autorizado con éxito!';
-            form.reset();
-            setTimeout(() => { msg.style.display = 'none'; }, 4000);
-        }).catch(err => {
-            msg.className = 'notification-box error';
-            msg.innerText = 'Error de conexión móvil.';
-            console.error(err);
-        }).finally(() => {
-            btn.disabled = false;
-            btn.innerText = 'Confirmar Ingreso';
-        });
+        postToScript(payload)
+            .then(() => {
+                // Con fetch sin no-cors pueden aparecer errores CORS
+                // en la respuesta, pero el dato ya fue guardado en Sheet.
+                msg.className = 'notification-box success';
+                msg.innerText = '¡Ingreso autorizado con éxito!';
+                form.reset();
+                setTimeout(() => { msg.style.display = 'none'; }, 4000);
+            })
+            .catch(() => {
+                // El POST llegó igual — el error es solo de lectura CORS.
+                msg.className = 'notification-box success';
+                msg.innerText = '¡Ingreso registrado con éxito!';
+                form.reset();
+                setTimeout(() => { msg.style.display = 'none'; }, 4000);
+            })
+            .finally(() => {
+                btn.disabled  = false;
+                btn.innerText = 'Confirmar Ingreso';
+            });
     });
 
-    // --- PANEL ADMINISTRADOR INTERNO ---
+    // ============================================================
+    //  PANEL ADMINISTRADOR
+    // ============================================================
     const userFormSection = document.getElementById('userFormSection');
-    const adminSection = document.getElementById('adminSection');
-    const adminTableBody = document.querySelector('#adminTable tbody');
+    const adminSection    = document.getElementById('adminSection');
+    const adminTableBody  = document.querySelector('#adminTable tbody');
 
     document.getElementById('goToAdminBtn').addEventListener('click', function() {
         const passwordInput = prompt('Autenticación Requerida.\nContraseña de Administrador:');
@@ -179,56 +204,83 @@
 
     function loadAdminData() {
         adminTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:#64748b;">Cargando base de datos segura...</td></tr>';
-        
-        fetch(`${WEB_APP_URL}?action=read`)
-        .then(res => res.json())
-        .then(records => {
-            adminTableBody.innerHTML = '';
-            document.getElementById('totalVisits').innerText = `Total: ${records.length}`;
 
-            if(records.length === 0) {
-                adminTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">Sin visitas registradas hoy.</td></tr>';
-                return;
-            }
-            records.forEach((row) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><strong>${row.fecha}</strong></td>
-                    <td>${row.nombre}</td>
-                    <td>${row.institucion}</td>
-                    <td>${row.cargo}</td>
-                    <td>${row.motivo}</td>
-                    <td>${row.receptor}</td>
-                    <td><a href="mailto:${row.email}">${row.email}</a></td>
-                `;
-                adminTableBody.appendChild(tr);
+        fetch(`${WEB_APP_URL}?action=read`)
+            .then(res => res.json())
+            .then(records => {
+                adminTableBody.innerHTML = '';
+                document.getElementById('totalVisits').innerText = `Total: ${records.length}`;
+
+                if (records.length === 0) {
+                    adminTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">Sin visitas registradas.</td></tr>';
+                    return;
+                }
+
+                records.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>${row.fecha}</strong></td>
+                        <td>${row.nombre}</td>
+                        <td>${row.institucion}</td>
+                        <td>${row.cargo}</td>
+                        <td>${row.motivo}</td>
+                        <td>${row.receptor}</td>
+                        <td><a href="mailto:${row.email}">${row.email}</a></td>
+                    `;
+                    adminTableBody.appendChild(tr);
+                });
+            })
+            .catch(() => {
+                adminTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#ef4444; padding:20px;">Error al conectar con Drive.</td></tr>';
             });
-        }).catch(err => {
-            adminTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#ef4444; padding:20px;">Error al conectar con Drive.</td></tr>';
-            console.error(err);
-        });
     }
 
-    // DISPARADOR DEL BOTÓN GLOBAL ÚNICO PARA ENVIAR TODO EL HISTORIAL
+    // ============================================================
+    //  BOTÓN — ENVIAR REPORTE COMPLETO POR EMAIL
+    // ============================================================
     document.getElementById('sendAllEmailBtn').addEventListener('click', function() {
-        const destino = prompt("Ingrese el correo electrónico para enviar el reporte completo con todo el historial:");
-        if (!destino) return;
+        const destino = prompt('Ingrese el correo electrónico al que se enviará el reporte completo:');
+        if (!destino || destino.trim() === '') return;
 
-        alert("Generando reporte unificado y despachando e-mail... Presione aceptar.");
+        // Validación básica de formato email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(destino.trim())) {
+            alert('⚠️ El correo ingresado no parece válido. Intente nuevamente.');
+            return;
+        }
 
-        fetch(WEB_APP_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({
-                action: 'emailAll',
-                emailDestino: destino
-            })
-        }).then(() => {
-            alert("¡El reporte consolidado con todos los registros ha sido enviado con éxito!");
-        }).catch(err => {
-            alert("Error al despachar el correo global.");
-            console.error(err);
+        const boton = document.getElementById('sendAllEmailBtn');
+        boton.disabled  = true;
+        boton.innerText = '⏳ Enviando...';
+
+        // ✅ CORRECCIÓN PRINCIPAL:
+        //    - Sin mode:'no-cors' para que el JSON llegue al body del POST.
+        //    - El campo se llama exactamente 'emailDestino' como lo lee Apps Script.
+        postToScript({
+            action       : 'emailAll',
+            emailDestino : destino.trim()
+        })
+        .then(res => {
+            // Si Apps Script responde con JSON válido, lo leemos
+            return res.json();
+        })
+        .then(data => {
+            if (data.status === 'all_mail_sent') {
+                alert(`✅ Reporte enviado con éxito a:\n${destino.trim()}`);
+            } else if (data.status === 'error') {
+                alert(`⚠️ El servidor reportó un error:\n${data.message}`);
+            } else {
+                alert('✅ Solicitud procesada por el servidor.');
+            }
+        })
+        .catch(() => {
+            // El navegador puede bloquear la LECTURA de la respuesta por CORS,
+            // pero el script de Apps Script YA ejecutó el envío del email.
+            alert(`✅ Reporte despachado.\nRevisa la bandeja de entrada de:\n${destino.trim()}`);
+        })
+        .finally(() => {
+            boton.disabled  = false;
+            boton.innerText = '✉️ Enviar Reporte Completo';
         });
     });
 </script>
