@@ -9,7 +9,6 @@
 <body>
 
 <div class="main-wrapper">
-    <!-- RECUADRO DEL FORMULARIO -->
     <div class="card-container" id="userFormSection">
         <div class="card-header">
             <h2>Registro de Entrada</h2>
@@ -58,7 +57,6 @@
         </div>
     </div>
 
-    <!-- RECUADRO DEL PANEL ADMINISTRADOR -->
     <div class="card-container admin-container" id="adminSection">
         <div class="card-header admin-header">
             <h2>Panel de Control</h2>
@@ -89,21 +87,19 @@
         </div>
     </div>
 
-    <!-- CRÉDITOS DE AUTORÍA -->
     <footer class="webmaster-footer">
         <p>Optimizado para Android e iOS por el Webmaster <strong>César Manríquez</strong> &copy; 2026</p>
     </footer>
 </div>
 
 <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxoegNitJCDlB9xc1xA4L9yflaxzHjA4vtMpS-kKjwKd0VPIcWI7sFiax31HJnkTM3NFg/exec'; 
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwLSztgJER9lk1WvLAgl2r7Ycj5T8GNwdsO8VrekcsYoGso90moNPPp3gt-MOMiOkTnzQ/exec'; 
     const ADMIN_PASSWORD = 'camf1980!'; 
 
     const form = document.getElementById('registrationForm');
     const msg = document.getElementById('responseMessage');
     const btn = document.getElementById('submitBtn');
 
-    // Función que corrige el formato a DD/MM/YYYY - HH:MM en Hora Local
     function obtenerFechaFormateada() {
         const ahora = new Date();
         const dia = String(ahora.getDate()).padStart(2, '0');
@@ -114,7 +110,6 @@
         return `${dia}/${mes}/${anio} - ${horas}:${minutos}`;
     }
 
-    // --- LOGICA DE ENVÍO DE DATOS ---
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         btn.disabled = true;
@@ -154,7 +149,6 @@
         });
     });
 
-    // --- PANEL ADMINISTRADOR ---
     const userFormSection = document.getElementById('userFormSection');
     const adminSection = document.getElementById('adminSection');
     const adminTableBody = document.querySelector('#adminTable tbody');
@@ -189,9 +183,8 @@
                 return;
             }
             records.forEach((row, index) => {
-                // Parche para limpiar el formato ISO largo que Sheets genera automáticamente
                 let fechaLimpia = row.fecha;
-                if(fechaLimpia.includes('T')) {
+                if(fechaLimpia && fechaLimpia.includes('T')) {
                     try {
                         const d = new Date(fechaLimpia);
                         const dia = String(d.getDate()).padStart(2, '0');
@@ -223,10 +216,23 @@
         });
     }
 
-    // Función de envío por correo electrónico ejecutada por el Administrador
     function enviarPorEmail(filaExcel) {
-        const destino = prompt("Ingrese el correo del destinatario para remitir el formulario:");
+        const destino = prompt("Ingrese el correo del destinatario:");
         if (!destino) return;
 
-        alert("Despachando correo electrónico... Presione aceptar.");
+        alert("Despachando correo... Presione aceptar.");
 
+        fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({
+                action: 'email',
+                row: filaExcel,
+                emailDestino: destino
+            })
+        }).then(() => {
+            alert("¡Formulario enviado con éxito!");
+        }).catch(err => {
+            alert("Error al despachar el correo.");
+            console.error(err);
