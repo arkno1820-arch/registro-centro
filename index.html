@@ -66,7 +66,11 @@
         </div>
         
         <div class="admin-meta">
-            <span class="badge" id="totalVisits">Total: 0</span>
+            <div>
+                <span class="badge" id="totalVisits">Total: 0</span>
+                <!-- BOTÓN ÚNICO GLOBAL PARA ENVIAR TODO EL REPORTE -->
+                <button class="secondary-btn" style="background-color: #2563eb; color: white; border: none; margin-left: 10px;" id="sendAllEmailBtn">✉️ Enviar Reporte Completo</button>
+            </div>
             <button class="secondary-btn" id="backToFormBtn">Volver</button>
         </div>
         
@@ -81,7 +85,6 @@
                         <th>Motivo</th>
                         <th>Recibe</th>
                         <th>E-mail</th>
-                        <th>Acción</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -96,15 +99,13 @@
 </div>
 
 <script>
-    // URL DE TU WEB APP EN GOOGLE DRIVE Y CONTRASEÑA DE SEGURIDAD
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzcaBCffWCQ6zHSw8Mv7L-SgAhlAzKJo4OENqq9bJHVj-bijQ0cxc79rhySSB6HJYyXYQ/exec'; 
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxx7nNFloFSBhSJ7mvMGAdZssmEpnte_ItN8dPE7_niet5m9YP6BI9jvdF8oYM7t8PWXw/exec'; 
     const ADMIN_PASSWORD = 'camf1980!'; 
 
     const form = document.getElementById('registrationForm');
     const msg = document.getElementById('responseMessage');
     const btn = document.getElementById('submitBtn');
 
-    // Función que captura el formato amigable DD/MM/YYYY - HH:MM en Hora Local
     function obtenerFechaFormateada() {
         const ahora = new Date();
         const dia = String(ahora.getDate()).padStart(2, '0');
@@ -115,7 +116,7 @@
         return `${dia}/${mes}/${anio} - ${horas}:${minutos}`;
     }
 
-    // --- LOGICA DE ENVÍO DE DATOS (VISITANTE) ---
+    // --- LÓGICA DE ENVÍO DE DATOS ---
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         btn.disabled = true;
@@ -177,7 +178,7 @@
     });
 
     function loadAdminData() {
-        adminTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:#64748b;">Cargando base de datos segura...</td></tr>';
+        adminTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:#64748b;">Cargando base de datos segura...</td></tr>';
         
         fetch(`${WEB_APP_URL}?action=read`)
         .then(res => res.json())
@@ -186,10 +187,10 @@
             document.getElementById('totalVisits').innerText = `Total: ${records.length}`;
 
             if(records.length === 0) {
-                adminTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px;">Sin visitas registradas hoy.</td></tr>';
+                adminTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">Sin visitas registradas hoy.</td></tr>';
                 return;
             }
-            records.forEach((row, index) => {
+            records.forEach((row) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><strong>${row.fecha}</strong></td>
@@ -199,41 +200,37 @@
                     <td>${row.motivo}</td>
                     <td>${row.receptor}</td>
                     <td><a href="mailto:${row.email}">${row.email}</a></td>
-                    <td>
-                        <button class="secondary-btn" style="padding: 6px 10px; font-size: 12px; background-color: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="enviarPorEmail(${index + 2})">✉️ Enviar</button>
-                    </td>
                 `;
                 adminTableBody.appendChild(tr);
             });
         }).catch(err => {
-            adminTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#ef4444; padding:20px;">Error al conectar con Drive.</td></tr>';
+            adminTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#ef4444; padding:20px;">Error al conectar con Drive.</td></tr>';
             console.error(err);
         });
     }
 
-    // Función de envío por correo electrónico que ejecuta el Administrador
-    function enviarPorEmail(filaExcel) {
-        const destino = prompt("Ingrese el correo del destinatario:");
+    // DISPARADOR DEL BOTÓN GLOBAL ÚNICO PARA ENVIAR TODO EL HISTORIAL
+    document.getElementById('sendAllEmailBtn').addEventListener('click', function() {
+        const destino = prompt("Ingrese el correo electrónico para enviar el reporte completo con todo el historial:");
         if (!destino) return;
 
-        alert("Despachando correo... Presione aceptar.");
+        alert("Generando reporte unificado y despachando e-mail... Presione aceptar.");
 
         fetch(WEB_APP_URL, {
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify({
-                action: 'email',
-                row: filaExcel,
+                action: 'emailAll',
                 emailDestino: destino
             })
         }).then(() => {
-            alert("¡Formulario enviado con éxito por correo electrónico!");
+            alert("¡El reporte consolidado con todos los registros ha sido enviado con éxito!");
         }).catch(err => {
-            alert("Error al despachar el correo.");
+            alert("Error al despachar el correo global.");
             console.error(err);
         });
-    }
+    });
 </script>
 </body>
 </html>
