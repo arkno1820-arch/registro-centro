@@ -1,0 +1,235 @@
+:root {
+    --primary: #0f172a;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --bg-main: #f1f5f9;
+    --card-bg: #ffffff;
+    --text-dark: #1e293b;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-dark);
+    -webkit-text-size-adjust: 100%;
+}
+
+.main-wrapper {
+    width: 100%;
+    padding: 12px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    justify-content: center;
+}
+
+.card-container {
+    background-color: var(--card-bg);
+    width: 100%;
+    max-width: 540px;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-sizing: border-box;
+}
+
+/* BLINDAJE CRÍTICO: Oculta de raíz y de forma estricta el panel para los visitantes */
+.admin-container {
+    max-width: 96%;
+    display: none !important;
+}
+
+.card-header {
+    background-color: var(--primary);
+    color: #ffffff;
+    padding: 24px 20px;
+    text-align: center;
+}
+
+.card-header h2 {
+    margin: 0 0 6px 0;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.card-header p {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+.admin-header {
+    background-color: #1e293b;
+}
+
+.styled-form {
+    padding: 24px 20px;
+}
+
+.form-group {
+    margin-bottom: 18px;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+label {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+input {
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 16px;
+    color: var(--text-dark);
+    background-color: #f8fafc;
+    box-sizing: border-box;
+    width: 100%;
+    -webkit-appearance: none;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.primary-btn {
+    width: 100%;
+    height: 50px;
+    background-color: var(--accent);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.secondary-btn {
+    padding: 10px 16px;
+    background-color: #ffffff;
+    color: var(--text-dark);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.text-link-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    padding: 12px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.card-footer {
+    padding: 0 20px 20px 20px;
+    text-align: center;
+}
+
+.notification-box {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    display: none;
+    text-align: center;
+}
+
+.notification-box.info { background-color: #eff6ff; color: #1e40af; }
+.notification-box.success { background-color: #ecfdf5; color: #065f46; }
+.notification-box.error { background-color: #fef2f2; color: #991b1b; }
+
+.admin-meta {
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.badge {
+    background-color: #e2e8f0;
+    color: var(--primary);
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-weight: 700;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    padding: 0 20px 20px 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    white-space: nowrap;
+}
+
+th {
+    background-color: #f8fafc;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 11px;
+}
+
+.webmaster-footer {
+    margin-top: 24px;
+    text-align: center;
+}
+
+.webmaster-footer p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+@media (max-width: 480px) {
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    .styled-form {
+        padding: 16px 15px;
+    }
+    .card-header h2 {
+        font-size: 20px;
+    }
+}
